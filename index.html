@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, height=540, initial-scale=1.0">
+  <title>Layered Images with Date, Time, and Weather</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 1920px;
+      height: 540px;
+      overflow: hidden;
+      background-color: #FBBF66;
+    }
+    
+    #news-box {
+      position: absolute;
+      top: 15%;
+      left: 71.2%;
+      transform: translateX(-50%);
+      width: 42%;
+      height: 33.5%;
+      background-color: white;
+      opacity: 0;
+      z-index: 997;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      transition: opacity 1s ease;
+      overflow: hidden;
+      padding: 10px;
+    }
+    #news-box.visible { opacity: 0.8; }
+    
+    #duplicate-zia-lines {
+      position: absolute;
+      top: 0;
+      left: 44.8%;
+      transform: translateX(-50%);
+      width: 110.3%;
+      height: 55.3%;
+      max-height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      z-index: 999;
+      transition: opacity 1s ease;
+    }
+    #duplicate-zia-lines.visible,
+    #news-box.visible { opacity: 1; }
+
+    .layer {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      height: 50%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    #layer1 { z-index: 1000; }
+    #layer5 {
+      z-index: 4;
+      object-fit: contain;
+      width: 110%;
+      height: 55%;
+      top: 0;
+      left: 45%;
+      transform: translateX(-50%);
+    }
+    #layer6 {
+      z-index: 2;
+      object-fit: contain;
+      width: 110%;
+      height: 55%;
+      top: 0;
+      left: 45%;
+      transform: translateX(-50%);
+    }
+    #layer1 { z-index: 1000; top: 10; }
+    #layer5 { z-index: 4; object-fit: fill; opacity: 0.7; }
+    #layer6 { z-index: 2; object-fit: fill; opacity: 0.7; }
+    #layer8 { z-index: 1; }
+
+    .moving-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      display: flex;
+    }
+    #layer2 { z-index: 7; animation: moveLayer2 80s linear infinite; }
+    #layer3 { z-index: 6; animation: moveLayer3 160s linear infinite; }
+    #layer4 { z-index: 5; animation: moveLayer4 230s linear infinite; }
+    #layer7 { z-index: 3; animation: moveLayer5 110s linear infinite; }
+
+    @keyframes moveLayer2 { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes moveLayer3 { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes moveLayer4 { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes moveLayer5 { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* === Left column: Date/Time/Weather/Week === */
+    .date-time-weather {
+      position: absolute;
+      top: 20%;
+      left: 20px;
+      color: white;
+      font-size: 3.8em;
+      font-family: Arial, sans-serif;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .blink { animation: blink 1s steps(2, start) infinite; }
+    @keyframes blink { to { visibility: hidden; } }
+
+    .weather-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-left: 2px;
+    }
+    #weather-icon {
+      width: 1.4em;
+      height: 1.4em;
+      margin-left: 10px;
+    }
+    #temperature { font-size: 1em; }
+
+    /* Week pill (legacy-safe) */
+    #week-label-container {
+      margin-top: 0.25em;
+      padding: 0.15em 0.6em;
+      border-radius: 0.4em;
+      text-align: center;
+      font-size: 0.8em;
+      font-weight: 800;
+      color: #fff;
+      display: inline-block;   /* legacy-safe */
+      /* no width: fit-content; */
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .a-week { background-color: #dc3545; } /* red */
+    .b-week { background-color: #0275d8; } /* blue */
+    #week-label { letter-spacing: 0.03em; }
+
+    #lunch-overlay {
+      position: fixed;
+      inset: 0;
+      width: 1920px;
+      height: 540px;
+      display: none;
+      align-items: flex-start;
+      justify-content: flex-start;
+      background: white;
+      color: #d62828;
+      z-index: 3000;
+      text-align: center;
+      padding: 24px 40px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    #lunch-overlay.visible {
+      display: flex;
+    }
+    #lunch-overlay > div {
+      width: 58%;
+      max-width: 1200px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 12px;
+      margin-left: 100px;
+      margin-top: 80px;
+    }
+    #lunch-overlay .message {
+      margin: 0;
+      font-size: clamp(34px, 4vw, 110px);
+      line-height: 0.92;
+      font-weight: 900;
+      letter-spacing: 0.015em;
+      text-transform: uppercase;
+      white-space: normal;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    #lunch-overlay .countdown {
+      margin-top: 0;
+      margin-left: 266px;
+      font-size: clamp(56px, 7vw, 180px);
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+    #lunch-test-controls {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
+      z-index: 3001;
+      display: flex;
+      gap: 12px;
+    }
+    #lunch-test-controls button {
+      font-size: 30px;
+      font-weight: 700;
+      width: 56px;
+      height: 56px;
+      border: 0;
+      border-radius: 50%;
+      background: #111;
+      color: #fff;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Locked in place layers -->
+  <img src="Images/Orange Background-06.png" id="layer8" class="layer" alt="Background">
+  <img src="Images/Zia Lines-02.png" id="layer6" class="layer" alt="Zia Lines">
+  <img src="Images/NF LOGO v3.png" id="layer1" class="layer" alt="Logo1">
+
+  <!-- Moving layers with duplicates for seamless loop -->
+  <div id="layer2" class="moving-layer">
+    <img src="Images/Brush-02.png" alt="Brush" style="width: 50%; height: 50%;">
+    <img src="Images/Brush-02.png" alt="Brush" style="width: 50%; height: 50%;">
+  </div>
+  <div id="layer3" class="moving-layer">
+    <img src="Images/Skyline-03.png" alt="Skyline" style="width: 50%; height: 50%;">
+    <img src="Images/Skyline-03.png" alt="Skyline" style="width: 50%; height: 50%;">
+  </div>
+  <div id="layer4" class="moving-layer">
+    <img src="Images/Mountains-04.png" alt="Mountains" style="width: 50%; height: 50%;">
+    <img src="Images/Mountains-04.png" alt="Mountains" style="width: 50%; height: 50%;">
+  </div>
+  <div id="layer7" class="moving-layer">
+    <img src="Images/Clouds-05.png" alt="Clouds" style="width: 50%; height: 50%;">
+    <img src="Images/Clouds-05.png" alt="Clouds" style="width: 50%; height: 50%;">
+  </div>
+
+  <!-- Left column stack -->
+  <div class="date-time-weather">
+    <div id="date"></div>
+    <div id="time"></div>
+    <div class="weather-container">
+      <div id="temperature"></div>
+      <img src="" alt="Weather Icon" id="weather-icon">
+    </div>
+    <div id="week-label-container">
+      <span id="week-label"></span>
+    </div>
+  </div>
+
+  <!-- Fade duplicates + news box -->
+  <img src="Images/Zia Lines-02.png" id="duplicate-zia-lines" class="fade-duplicate" alt="Duplicate Zia Lines">
+  <div id="news-box" class="fade-duplicate">
+    <p>Sample News Text</p>
+  </div>
+
+  <div id="lunch-overlay" aria-live="polite">
+    <div>
+      <div id="lunch-message" class="message">Lunch ends in 5 minutes</div>
+      <div id="lunch-countdown" class="countdown">5:00</div>
+    </div>
+  </div>
+
+  <div id="lunch-test-controls">
+    <button type="button" data-lunch-test="5">5</button>
+    <button type="button" data-lunch-test="0">0</button>
+  </div>
+
+  <!-- Polyfill (must load BEFORE your script) -->
+  <script>
+  /* Minimal fetch polyfill + Promise fallback for older WebViews */
+  (function () {
+    if (!window.Promise) {
+      window.Promise = function (fn) {
+        var thenCb = null, catchCb = null, resolved = false, value;
+        function resolve(v){ resolved = true; value = v; if (thenCb) thenCb(v); }
+        function reject(e){ if (catchCb) catchCb(e); }
+        setTimeout(function(){ try{ fn(resolve, reject); } catch(e){ reject(e); }},0);
+        return {
+          then: function(cb){ thenCb = cb; if (resolved) thenCb(value); return this; },
+          catch: function(cb){ catchCb = cb; return this; }
+        };
+      };
+    }
+    if (!window.fetch) {
+      window.fetch = function (url, opts) {
+        return new Promise(function (resolve) {
+          var xhr = new XMLHttpRequest();
+          xhr.open((opts && opts.method) || 'GET', url, true);
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+              var ok = xhr.status >= 200 && xhr.status < 300;
+              resolve({
+                ok: ok,
+                status: xhr.status,
+                text: function(){ return Promise.resolve(xhr.responseText); },
+                json: function(){
+                  try { return Promise.resolve(JSON.parse(xhr.responseText)); }
+                  catch(e){ return Promise.resolve({}); }
+                }
+              });
+            }
+          };
+          xhr.onerror = function(){
+            resolve({
+              ok:false, status:0,
+              text:function(){return Promise.resolve('');},
+              json:function(){return Promise.resolve({});}
+            });
+          };
+          xhr.send((opts && opts.body) || null);
+        });
+      };
+    }
+  })();
+  </script>
+
+  <!-- Load your ES5/XHR script (cache-busted) -->
+  <script src="week-config.js"></script>
+  <script src="completeZIA.js?v=es5_1"></script>
+
+  <!-- Inline helpers (ES5) -->
+  <script>
+    function updateDateTime() {
+      var now = new Date();
+      var dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+      var date = now.toLocaleDateString(undefined, dateOptions);
+
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+      var isPM = hours >= 12;
+      hours = hours % 12 || 12;
+      minutes = minutes < 10 ? ('0' + minutes) : minutes;
+      var period = isPM ? 'PM' : 'AM';
+      var time = hours + '<span class="blink">:</span>' + minutes + ' ' + period;
+
+      var dateEl = document.getElementById('date');
+      var timeEl = document.getElementById('time');
+      if (dateEl) dateEl.textContent = date;
+      if (timeEl) timeEl.innerHTML = time;
+    }
+
+    function fetchWeather() {
+      var apiKey = '0a9d0eb96a87453dba2182529242308';
+      var city = 'Albuquerque';
+      var url = 'https://api.weatherapi.com/v1/current.json?key=' + apiKey + '&q=' + city + '&aqi=no';
+
+      fetch(url).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        var tempEl = document.getElementById('temperature');
+        var iconEl = document.getElementById('weather-icon');
+        var temperature = Math.round(data.current && data.current.temp_f ? data.current.temp_f : 0);
+        var iconUrl = data.current && data.current.condition && data.current.condition.icon ? 'https:' + data.current.condition.icon : '';
+
+        if (tempEl) tempEl.innerHTML = temperature + '°F';
+        if (iconEl) {
+          if (iconUrl) {
+            iconEl.src = iconUrl;
+            iconEl.style.display = 'inline-block';
+          } else {
+            iconEl.style.display = 'none';
+          }
+        }
+      }).catch(function () {
+        var tempEl = document.getElementById('temperature');
+        if (tempEl) tempEl.innerHTML = 'N/A';
+        var iconEl = document.getElementById('weather-icon');
+        if (iconEl) iconEl.style.display = 'none';
+      });
+    }
+
+    var imageNodes = document.querySelectorAll('img');
+    for (var i = 0; i < imageNodes.length; i++) {
+      imageNodes[i].onerror = function () {
+        this.style.display = 'none';
+      };
+    }
+
+    var lunchOverlay = document.getElementById('lunch-overlay');
+    var lunchMessage = document.getElementById('lunch-message');
+    var lunchCountdown = document.getElementById('lunch-countdown');
+    var lunchInterval = null;
+    var lunchHoldTimeout = null;
+    var lunchSequenceActive = false;
+
+    function formatCountdown(totalSeconds) {
+      var minutes = Math.floor(totalSeconds / 60);
+      var seconds = totalSeconds % 60;
+      return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+    }
+
+    function clearLunchTimers() {
+      if (lunchInterval) {
+        clearInterval(lunchInterval);
+        lunchInterval = null;
+      }
+      if (lunchHoldTimeout) {
+        clearTimeout(lunchHoldTimeout);
+        lunchHoldTimeout = null;
+      }
+    }
+
+    function hideLunchOverlay() {
+      lunchSequenceActive = false;
+      clearLunchTimers();
+      if (lunchOverlay) lunchOverlay.classList.remove('visible');
+    }
+
+    function showLunchWarning(secondsRemaining) {
+      lunchSequenceActive = true;
+      if (!lunchOverlay) return;
+      lunchOverlay.classList.add('visible');
+      lunchMessage.textContent = 'Lunch ends in 5 minutes';
+      lunchCountdown.textContent = formatCountdown(secondsRemaining);
+    }
+
+    function showLunchEnded() {
+      if (!lunchOverlay) return;
+      lunchMessage.textContent = 'Lunch has ended';
+      lunchCountdown.textContent = '0:00';
+      lunchOverlay.classList.add('visible');
+    }
+
+    function startLunchSequence(secondsRemaining) {
+      clearLunchTimers();
+      showLunchWarning(secondsRemaining);
+
+      var remaining = secondsRemaining;
+      lunchInterval = setInterval(function () {
+        remaining = remaining - 1;
+
+        if (remaining <= 0) {
+          clearInterval(lunchInterval);
+          lunchInterval = null;
+          showLunchEnded();
+          lunchHoldTimeout = setTimeout(function () {
+            hideLunchOverlay();
+          }, 60000);
+          return;
+        }
+
+        lunchCountdown.textContent = formatCountdown(remaining);
+      }, 1000);
+    }
+
+    function triggerLunchWarningTest(mode) {
+      if (mode === '0') {
+        clearLunchTimers();
+        showLunchEnded();
+        lunchHoldTimeout = setTimeout(function () {
+          hideLunchOverlay();
+        }, 60000);
+        return;
+      }
+
+      startLunchSequence(5 * 60);
+    }
+
+    function checkLunchSchedule() {
+      var now = new Date();
+      if (lunchSequenceActive) return;
+      if (now.getHours() === 12 && now.getMinutes() === 48) {
+        startLunchSequence(5 * 60);
+      }
+    }
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === '5') {
+        triggerLunchWarningTest('5');
+      }
+      if (event.key === '0') {
+        triggerLunchWarningTest('0');
+      }
+    });
+
+    document.querySelectorAll('[data-lunch-test]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        triggerLunchWarningTest(button.getAttribute('data-lunch-test'));
+      });
+    });
+
+    setInterval(checkLunchSchedule, 1000);
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+    fetchWeather();
+    setInterval(fetchWeather, 60000);
+  </script>
+</body>
+</html>
