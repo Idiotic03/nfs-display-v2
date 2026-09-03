@@ -1,6 +1,6 @@
 window.WEEK_CONFIG = {
-  mode: 'MANUAL',
-  currentType: 'REGULAR',
+  mode: 'AUTO',
+  currentType: 'A-WEEK',
   types: {
     A: { label: 'A-WEEK', color: '#d9534f' },
     B: { label: 'B-WEEK', color: '#0275d8' },
