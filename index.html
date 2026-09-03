@@ -44,8 +44,8 @@
       z-index: 999;
       transition: opacity 1s ease;
     }
-    #duplicate-zia-lines.visible,
-    #news-box.visible { opacity: 1; }
+    #duplicate-zia-lines.visible { opacity: 1; }
+    #news-box.visible { opacity: 0.8; }
 
     .layer {
       position: absolute;
@@ -222,7 +222,7 @@
 <body>
   <!-- Locked in place layers -->
   <img src="Images/Orange Background-06.png" id="layer8" class="layer" alt="Background">
-  <img src="Images/Zia Lines-01.png" id="layer6" class="layer" alt="Zia Lines">
+  <img src="Images/Zia Lines-02.png" id="layer6" class="layer" alt="Zia Lines">
   <img src="Images/NF LOGO v3.png" id="layer1" class="layer" alt="Logo1">
 
   <!-- Moving layers with duplicates for seamless loop -->
@@ -257,7 +257,7 @@
   </div>
 
   <!-- Fade duplicates + news box -->
-  <img src="Images/Zia Lines-01.png" id="duplicate-zia-lines" class="fade-duplicate" alt="Duplicate Zia Lines">
+  <img src="Images/Zia Lines-02.png" id="duplicate-zia-lines" class="fade-duplicate" alt="Duplicate Zia Lines">
   <div id="news-box" class="fade-duplicate">
     <p>Sample News Text</p>
   </div>

@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
-  var elements = [];
-  var e2 = document.getElementById('duplicate-zia-lines');
-  var e3 = document.getElementById('news-box');
-  if (e2) elements.push(e2);
-  if (e3) elements.push(e3);
+  var elements = [
+    document.getElementById('duplicate-zia-lines'),
+    document.getElementById('news-box')
+  ];
 
   var currentIndex = 0;
   var newsFiles = [];
