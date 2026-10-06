@@ -146,6 +146,7 @@
       position: absolute;
       top: 20%;
       left: 20px;
+      width: 1880px;
       color: white;
       font-size: 3.8em;
       font-family: Arial, sans-serif;
@@ -174,10 +175,17 @@
     }
     #temperature { font-size: 1em; }
 
-    /* Week pill (legacy-safe) */
-    #week-label-container {
-      align-self: flex-start;
+    /* Week and current-period labels share one horizontal row. */
+    #week-status-row {
+      --period-label-offset-x: 0px;
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: flex-start;
       margin-top: 0.18em;
+    }
+
+    #week-label-container {
       padding: 0.15em 0.6em;
       border-radius: 0.4em;
       text-align: center;
@@ -191,6 +199,65 @@
     .a-week { background-color: #dc3545; } /* red */
     .b-week { background-color: #0275d8; } /* blue */
     #week-label { letter-spacing: 0.03em; }
+
+    #current-period-label {
+      max-width: 60%;
+      margin-left: calc(12px + var(--period-label-offset-x));
+      font-size: 0.48em;
+      font-weight: 700;
+      line-height: 1.1;
+      text-align: right;
+      white-space: nowrap;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.35);
+    }
+
+    #news-box .schedule-announcement {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr);
+      gap: 22px;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      box-sizing: border-box;
+      padding: 12px 28px;
+      border-left: 10px solid #e67822;
+      background: linear-gradient(105deg, #fff1d8 0%, #ffffff 82%);
+      color: #202020;
+      text-align: left;
+    }
+
+    #news-box .announcement-icon {
+      font-family: "Segoe UI Emoji", sans-serif;
+      font-size: 66px;
+      line-height: 1;
+      text-align: center;
+    }
+
+    #news-box .announcement-copy {
+      min-width: 0;
+    }
+
+    #news-box .announcement-kicker {
+      color: #a84c12;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    #news-box .announcement-period {
+      margin: 3px 0 5px;
+      color: #171717;
+      font-size: 46px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    #news-box .announcement-instruction {
+      color: #353535;
+      font-size: 22px;
+      font-weight: 600;
+      line-height: 1.15;
+    }
 
     #lunch-overlay {
       position: fixed;
@@ -301,8 +368,11 @@
             <div id="temperature"></div>
             <img src="" alt="Weather Icon" id="weather-icon">
         </div>
-        <div id="week-label-container">
+        <div id="week-status-row">
+          <div id="week-label-container">
             <span id="week-label"></span>
+          </div>
+          <div id="current-period-label" aria-live="polite"></div>
         </div>
       </div>
 
