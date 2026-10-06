@@ -178,6 +178,7 @@
     /* Week and current-period labels share one horizontal row. */
     #week-status-row {
       --period-label-offset-x: 0px;
+      --period-label-gap: 44px;
       display: flex;
       width: 100%;
       align-items: center;
@@ -202,7 +203,10 @@
 
     #current-period-label {
       max-width: 60%;
-      margin-left: calc(12px + var(--period-label-offset-x));
+      margin-left: calc(var(--period-label-gap) + var(--period-label-offset-x));
+      padding: 0.12em 0.35em;
+      border-radius: 0.2em;
+      background-color: rgba(0, 0, 0, 0.48);
       font-size: 0.48em;
       font-weight: 700;
       line-height: 1.1;
