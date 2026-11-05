@@ -35,38 +35,119 @@ document.addEventListener('DOMContentLoaded', function () {
     return 'contents/' + file;
   }
 
-  function isAWeek() {
-    var startDate = new Date('2026-04-06');
-    var nowDate = new Date();
-    var diffInDays = Math.floor((nowDate - startDate) / (1000 * 60 * 60 * 24));
-    var weeksPassed = Math.floor(diffInDays / 7);
-    return (weeksPassed % 2 === 0) ? 'A' : 'B';
+  function getLocalMonday(d) {
+    var date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var day = date.getDay();
+    var diff = (day + 6) % 7;
+    date.setDate(date.getDate() - diff);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  function parseDateAsLocal(dateStr) {
+    if (!dateStr) return null;
+    if (dateStr instanceof Date) return dateStr;
+    var parts = String(dateStr).trim().split('-');
+    if (parts.length === 3) {
+      var year = parseInt(parts[0], 10);
+      var month = parseInt(parts[1], 10) - 1;
+      var day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        return new Date(year, month, day, 0, 0, 0, 0);
+      }
+    }
+    var parsed = new Date(dateStr);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  function isAWeek(nowDate) {
+    nowDate = nowDate || new Date();
+    var config = window.WEEK_CONFIG || {};
+    var curMonday = getLocalMonday(nowDate);
+    var curMondayStr = curMonday.getFullYear() + '-' +
+      ('0' + (curMonday.getMonth() + 1)).slice(-2) + '-' +
+      ('0' + curMonday.getDate()).slice(-2);
+
+    var refDateStr = config.referenceDate || config.startDate;
+    var refWeek = (config.referenceWeek || config.startWeek || '').toUpperCase();
+
+    var configuredType = (config.currentType || '').toUpperCase();
+    if (!refDateStr && (configuredType === 'A' || configuredType === 'B')) {
+      try {
+        var lastSaved = window.localStorage ? window.localStorage.getItem('week_config_saved_type') : null;
+        if (lastSaved !== configuredType && window.localStorage) {
+          window.localStorage.setItem('week_config_saved_type', configuredType);
+          window.localStorage.setItem('week_config_anchor_monday', curMondayStr);
+          window.localStorage.setItem('week_config_anchor_type', configuredType);
+        }
+      } catch (e) {
+        // LocalStorage may be unavailable in some environments
+      }
+    }
+
+    var baseMonday;
+    var baseType;
+
+    if (refDateStr) {
+      var parsedRef = parseDateAsLocal(refDateStr);
+      baseMonday = parsedRef ? getLocalMonday(parsedRef) : getLocalMonday(new Date(2026, 3, 6));
+      baseType = (refWeek === 'B') ? 'B' : 'A';
+    } else {
+      var anchorMonday = null;
+      var anchorType = null;
+      try {
+        if (window.localStorage) {
+          anchorMonday = window.localStorage.getItem('week_config_anchor_monday');
+          anchorType = window.localStorage.getItem('week_config_anchor_type');
+        }
+      } catch (e) {}
+
+      if (anchorMonday && anchorType && (configuredType === 'A' || configuredType === 'B')) {
+        var parsedAnchor = parseDateAsLocal(anchorMonday);
+        baseMonday = parsedAnchor ? getLocalMonday(parsedAnchor) : getLocalMonday(new Date(2026, 3, 6));
+        baseType = anchorType;
+      } else {
+        baseMonday = getLocalMonday(new Date(2026, 3, 6));
+        baseType = (refWeek === 'B' || configuredType === 'B') ? 'B' : 'A';
+      }
+    }
+
+    var diffMs = curMonday.getTime() - baseMonday.getTime();
+    var weeksPassed = Math.round(diffMs / (7 * 24 * 60 * 60 * 1000));
+    var isEven = (Math.abs(weeksPassed) % 2 === 0);
+
+    if (baseType === 'B') {
+      return isEven ? 'B' : 'A';
+    }
+    return isEven ? 'A' : 'B';
+  }
+
+  function getCurrentType(now) {
+    now = now || new Date();
+    var config = window.WEEK_CONFIG || {};
+    var mode = (config.mode || 'AUTO').toUpperCase();
+
+    if (mode === 'MANUAL') {
+      return config.currentType || 'REGULAR';
+    }
+
+    return isAWeek(now);
   }
 
   function getWeekConfig() {
     var config = window.WEEK_CONFIG || {};
     var types = config.types || {};
-    var currentType = config.currentType;
+    var type = getCurrentType();
 
-    if (currentType && types[currentType]) {
-      return types[currentType];
+    if (types[type]) {
+      return types[type];
     }
 
-    if (config.mode === 'MANUAL' && currentType && !types[currentType]) {
-      return { label: currentType, color: '#0275d8' };
+    if (config.mode === 'MANUAL' && config.currentType) {
+      return { label: config.currentType, color: '#0275d8' };
     }
 
-    var autoType = isAWeek();
-    return types[autoType] || { label: autoType + '-WEEK', color: '#0275d8' };
-  }
-
-  function getCurrentType() {
-    var config = window.WEEK_CONFIG || {};
-    var types = config.types || {};
-    if (config.currentType && (types[config.currentType] || config.mode === 'MANUAL')) {
-      return config.currentType;
-    }
-    return isAWeek();
+    return { label: type + '-WEEK', color: '#0275d8' };
   }
 
   function makeBlock(start, end, label, periodWord) {
@@ -84,37 +165,37 @@ document.addEventListener('DOMContentLoaded', function () {
       if ((type === 'A' || type === 'REGULAR') && monday) {
         blocks = [
           makeBlock('09:15', '10:25', '1st Period', 'first'),
-          makeBlock('10:30', '11:40', '2nd Period', 'second'),
-          makeBlock('11:45', '12:16', 'Advisory'),
-          makeBlock('12:23', '12:53', 'Lunch'),
-          makeBlock('12:59', '14:27', '3rd Period', 'third'),
-          makeBlock('14:32', '16:00', '4th Period', 'fourth')
+          makeBlock('10:26', '11:40', '2nd Period', 'second'),
+          makeBlock('11:41', '12:16', 'Advisory'),
+          makeBlock('12:17', '12:53', 'Lunch'),
+          makeBlock('12:54', '14:27', '3rd Period', 'third'),
+          makeBlock('14:28', '16:00', '4th Period', 'fourth')
         ];
       } else if ((type === 'A' || type === 'REGULAR') && friday) {
         blocks = [
           makeBlock('09:15', '10:10', '1st Period', 'first'),
-          makeBlock('10:15', '11:10', '2nd Period', 'second'),
-          makeBlock('11:15', '12:16', 'Discovery Hour'),
-          makeBlock('12:23', '12:53', 'Lunch'),
-          makeBlock('12:59', '14:27', '3rd Period', 'third'),
-          makeBlock('14:32', '16:00', '4th Period', 'fourth')
+          makeBlock('10:11', '11:10', '2nd Period', 'second'),
+          makeBlock('11:11', '12:16', 'Discovery Hour'),
+          makeBlock('12:17', '12:53', 'Lunch'),
+          makeBlock('12:54', '14:27', '3rd Period', 'third'),
+          makeBlock('14:28', '16:00', '4th Period', 'fourth')
         ];
       } else if (type === 'B' && monday) {
         blocks = [
           makeBlock('09:15', '10:43', '1st Period', 'first'),
-          makeBlock('10:48', '12:16', '2nd Period', 'second'),
-          makeBlock('12:23', '12:53', 'Lunch'),
-          makeBlock('12:59', '13:29', 'Advisory'),
-          makeBlock('13:34', '14:45', '3rd Period', 'third'),
-          makeBlock('14:50', '16:00', '4th Period', 'fourth')
+          makeBlock('10:44', '12:16', '2nd Period', 'second'),
+          makeBlock('12:17', '12:53', 'Lunch'),
+          makeBlock('12:54', '13:29', 'Advisory'),
+          makeBlock('13:30', '14:45', '3rd Period', 'third'),
+          makeBlock('14:46', '16:00', '4th Period', 'fourth')
         ];
       } else if (type === 'B' && friday) {
         blocks = [
           makeBlock('09:15', '10:10', '1st Period', 'first'),
-          makeBlock('10:15', '11:10', '2nd Period', 'second'),
-          makeBlock('11:15', '11:45', 'Lunch'),
-          makeBlock('11:50', '12:50', 'Discovery Hour'),
-          makeBlock('12:55', '13:59', '3rd Period', 'third'),
+          makeBlock('10:11', '11:10', '2nd Period', 'second'),
+          makeBlock('11:11', '11:45', 'Lunch'),
+          makeBlock('11:46', '12:50', 'Discovery Hour'),
+          makeBlock('12:51', '13:59', '3rd Period', 'third'),
           makeBlock('14:04', '16:00', '4th Period', 'fourth')
         ];
       } else if (type === 'B') {
@@ -220,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function updateWeekLabel() {
     var config = getWeekConfig();
+    var currentType = getCurrentType();
     var container = document.getElementById('week-label-container');
     var label = document.getElementById('week-label');
     if (!container || !label) return;
@@ -236,6 +318,12 @@ document.addEventListener('DOMContentLoaded', function () {
       .replace(/\bb-week\b/g, '')
       .replace(/\s{2,}/g, ' ')
       .trim();
+
+    if (currentType === 'A') {
+      container.classList.add('a-week');
+    } else if (currentType === 'B') {
+      container.classList.add('b-week');
+    }
 
     container.style.backgroundColor = config.color || '#0275d8';
   }
