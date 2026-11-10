@@ -70,9 +70,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var refDateStr = config.referenceDate || config.startDate;
     var refWeek = (config.referenceWeek || config.startWeek || '').toUpperCase();
-
     var configuredType = (config.currentType || '').toUpperCase();
-    if (!refDateStr && (configuredType === 'A' || configuredType === 'B')) {
+
+    var activeType = (refWeek === 'A' || refWeek === 'B')
+      ? refWeek
+      : ((configuredType === 'A' || configuredType === 'B') ? configuredType : 'A');
+
+    if ((configuredType === 'A' || configuredType === 'B') && refWeek && configuredType !== refWeek) {
+      activeType = configuredType;
+    }
+
+    if (configuredType === 'A' || configuredType === 'B') {
       try {
         var lastSaved = window.localStorage ? window.localStorage.getItem('week_config_saved_type') : null;
         if (lastSaved !== configuredType && window.localStorage) {
@@ -91,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (refDateStr) {
       var parsedRef = parseDateAsLocal(refDateStr);
       baseMonday = parsedRef ? getLocalMonday(parsedRef) : getLocalMonday(new Date(2026, 3, 6));
-      baseType = (refWeek === 'B') ? 'B' : 'A';
+      baseType = activeType;
     } else {
       var anchorMonday = null;
       var anchorType = null;
@@ -108,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
         baseType = anchorType;
       } else {
         baseMonday = getLocalMonday(new Date(2026, 3, 6));
-        baseType = (refWeek === 'B' || configuredType === 'B') ? 'B' : 'A';
+        baseType = activeType;
       }
     }
 
@@ -134,10 +142,11 @@ document.addEventListener('DOMContentLoaded', function () {
     return isAWeek(now);
   }
 
-  function getWeekConfig() {
+  function getWeekConfig(now) {
+    now = now || new Date();
     var config = window.WEEK_CONFIG || {};
     var types = config.types || {};
-    var type = getCurrentType();
+    var type = getCurrentType(now);
 
     if (types[type]) {
       return types[type];
@@ -300,8 +309,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updateWeekLabel() {
-    var config = getWeekConfig();
-    var currentType = getCurrentType();
+    var now = new Date();
+    var config = getWeekConfig(now);
+    var currentType = getCurrentType(now);
     var container = document.getElementById('week-label-container');
     var label = document.getElementById('week-label');
     if (!container || !label) return;

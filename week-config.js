@@ -4,13 +4,13 @@ window.WEEK_CONFIG = {
   // - 'MANUAL': Locks the schedule to whatever is set in 'currentType' below.
   mode: 'AUTO',
 
-  // Current schedule type (used when mode is 'MANUAL', or as the initial week in 'AUTO'):
+  // Current schedule type (used when mode is 'MANUAL', or as the active week in 'AUTO'):
   // Options: 'A', 'B', 'EVENT', 'GARDEN', 'LONG_ADVISORY', 'DELAYED', 'REGULAR'
   currentType: 'A',
 
   // AUTO mode reference Monday and week type:
   // Every following Monday, it will automatically alternate (A -> B -> A -> B...)
-  referenceDate: '2026-11-02',
+  referenceDate: '2026-11-09',
   referenceWeek: 'A',
 
   types: {
