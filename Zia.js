@@ -166,67 +166,81 @@ document.addEventListener('DOMContentLoaded', function () {
   function getScheduleBlocks(type, day) {
     var monday = day === 1;
     var friday = day === 5;
-    var blocks;
 
     if (day < 1 || day > 5) return [];
 
-    if (type === 'A' || type === 'B' || type === 'REGULAR') {
-      if ((type === 'A' || type === 'REGULAR') && monday) {
-        blocks = [
-          makeBlock('09:15', '10:25', '1st Period', 'first'),
-          makeBlock('10:26', '11:40', '2nd Period', 'second'),
-          makeBlock('11:41', '12:16', 'Advisory'),
-          makeBlock('12:17', '12:53', 'Lunch'),
-          makeBlock('12:54', '14:27', '3rd Period', 'third'),
-          makeBlock('14:28', '16:00', '4th Period', 'fourth')
-        ];
-      } else if ((type === 'A' || type === 'REGULAR') && friday) {
-        blocks = [
-          makeBlock('09:15', '10:10', '1st Period', 'first'),
-          makeBlock('10:11', '11:10', '2nd Period', 'second'),
-          makeBlock('11:11', '12:16', 'Discovery Hour'),
-          makeBlock('12:17', '12:53', 'Lunch'),
-          makeBlock('12:54', '14:27', '3rd Period', 'third'),
-          makeBlock('14:28', '16:00', '4th Period', 'fourth')
-        ];
-      } else if (type === 'B' && monday) {
-        blocks = [
-          makeBlock('09:15', '10:43', '1st Period', 'first'),
-          makeBlock('10:44', '12:16', '2nd Period', 'second'),
-          makeBlock('12:17', '12:53', 'Lunch'),
-          makeBlock('12:54', '13:29', 'Advisory'),
-          makeBlock('13:30', '14:45', '3rd Period', 'third'),
-          makeBlock('14:46', '16:00', '4th Period', 'fourth')
-        ];
-      } else if (type === 'B' && friday) {
-        blocks = [
-          makeBlock('09:15', '10:10', '1st Period', 'first'),
-          makeBlock('10:11', '11:10', '2nd Period', 'second'),
-          makeBlock('11:11', '11:45', 'Lunch'),
-          makeBlock('11:46', '12:50', 'Discovery Hour'),
-          makeBlock('12:51', '13:59', '3rd Period', 'third'),
-          makeBlock('14:04', '16:00', '4th Period', 'fourth')
-        ];
-      } else if (type === 'B') {
-        blocks = [
-          makeBlock('09:15', '10:43', '1st Period', 'first'),
-          makeBlock('10:48', '12:16', '2nd Period', 'second'),
-          makeBlock('12:23', '12:53', 'Lunch'),
-          makeBlock('12:59', '13:29', 'Tutoring'),
-          makeBlock('13:34', '14:45', '3rd Period', 'third'),
-          makeBlock('14:50', '16:00', '4th Period', 'fourth')
-        ];
-      } else {
-        blocks = [
+    if (type === 'REGULAR') {
+      return [
+        makeBlock('09:15', '10:43', '1st Period', 'first'),
+        makeBlock('10:48', '12:16', '2nd Period', 'second'),
+        makeBlock('12:23', '12:53', 'Lunch'),
+        makeBlock('12:59', '14:27', '3rd Period', 'third'),
+        makeBlock('14:32', '16:00', '4th Period', 'fourth')
+      ];
+    }
+
+    if (type === 'A') {
+      if (monday) {
+        return [
           makeBlock('09:15', '10:25', '1st Period', 'first'),
           makeBlock('10:30', '11:40', '2nd Period', 'second'),
-          makeBlock('11:45', '12:16', 'Tutoring'),
+          makeBlock('11:45', '12:16', 'Advisory'),
           makeBlock('12:23', '12:53', 'Lunch'),
           makeBlock('12:59', '14:27', '3rd Period', 'third'),
           makeBlock('14:32', '16:00', '4th Period', 'fourth')
         ];
       }
-      return blocks;
+      if (friday) {
+        return [
+          makeBlock('09:15', '10:10', '1st Period', 'first'),
+          makeBlock('10:15', '11:10', '2nd Period', 'second'),
+          makeBlock('11:15', '12:16', 'Discovery Hour'),
+          makeBlock('12:23', '12:53', 'Lunch'),
+          makeBlock('12:59', '14:27', '3rd Period', 'third'),
+          makeBlock('14:32', '16:00', '4th Period', 'fourth')
+        ];
+      }
+      // Tuesday / Wednesday / Thursday
+      return [
+        makeBlock('09:15', '10:25', '1st Period', 'first'),
+        makeBlock('10:30', '11:40', '2nd Period', 'second'),
+        makeBlock('11:45', '12:16', 'Tutoring'),
+        makeBlock('12:23', '12:53', 'Lunch'),
+        makeBlock('12:59', '14:27', '3rd Period', 'third'),
+        makeBlock('14:32', '16:00', '4th Period', 'fourth')
+      ];
+    }
+
+    if (type === 'B') {
+      if (monday) {
+        return [
+          makeBlock('09:15', '10:43', '1st Period', 'first'),
+          makeBlock('10:48', '12:16', '2nd Period', 'second'),
+          makeBlock('12:23', '12:53', 'Lunch'),
+          makeBlock('12:59', '13:29', 'Advisory'),
+          makeBlock('13:34', '14:45', '3rd Period', 'third'),
+          makeBlock('14:50', '16:00', '4th Period', 'fourth')
+        ];
+      }
+      if (friday) {
+        return [
+          makeBlock('09:15', '10:43', '1st Period', 'first'),
+          makeBlock('10:48', '12:16', '2nd Period', 'second'),
+          makeBlock('12:23', '12:53', 'Lunch'),
+          makeBlock('12:59', '13:54', '3rd Period', 'third'),
+          makeBlock('14:04', '14:59', '4th Period', 'fourth'),
+          makeBlock('15:04', '16:00', 'Discovery Hour')
+        ];
+      }
+      // Tuesday / Wednesday / Thursday
+      return [
+        makeBlock('09:15', '10:43', '1st Period', 'first'),
+        makeBlock('10:48', '12:16', '2nd Period', 'second'),
+        makeBlock('12:23', '12:53', 'Lunch'),
+        makeBlock('12:59', '13:29', 'Tutoring'),
+        makeBlock('13:34', '14:45', '3rd Period', 'third'),
+        makeBlock('14:50', '16:00', '4th Period', 'fourth')
+      ];
     }
 
     if (type === 'EVENT') {
@@ -245,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function () {
         makeBlock('09:15', '10:43', '1st Period', 'first'),
         makeBlock('10:48', '12:16', '2nd Period', 'second'),
         makeBlock('12:23', '12:53', 'Lunch'),
-        makeBlock('12:59', '14:09', '3rd Period', 'third'),
+        makeBlock('12:59', '14:05', '3rd Period', 'third'),
         makeBlock('14:10', '14:50', 'Garden'),
         makeBlock('14:55', '16:00', '4th Period', 'fourth')
       ];
@@ -277,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function getCurrentBlock(now) {
     now = now || new Date();
-    var blocks = getScheduleBlocks(getCurrentType(), now.getDay());
+    var blocks = getScheduleBlocks(getCurrentType(now), now.getDay());
     var currentMinutes = now.getHours() * 60 + now.getMinutes();
 
     for (var i = 0; i < blocks.length; i++) {
